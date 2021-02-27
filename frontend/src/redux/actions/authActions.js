@@ -18,11 +18,9 @@ export const loginUser = loginData => dispatch => {
 	console.log('HHHHHHH', loginData);
 	dispatch({ type: LOGIN_REQUEST, payload: loginData });
 	axios
-		.post(`${REACT_APP_BACKEND}/users/login`, loginData, {
-			proxy: {
-				host: 'localhost',
-				port: 3000,
-			},
+		.post(`${REACT_APP_BACKEND}/users/login`, {
+			username: 'test',
+			password: '12345',
 		})
 		.then(res => {
 			console.log('RRRRR', res.data);

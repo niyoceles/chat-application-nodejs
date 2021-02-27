@@ -26,6 +26,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "https://chatapp.api.niyonsaba.com",
   "eslintConfig": {
     "extends": [
       "react-app",

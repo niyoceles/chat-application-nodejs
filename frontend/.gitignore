@@ -12,6 +12,9 @@
 # production
 /build
 
+.env
+.env.test
+
 # misc
 .DS_Store
 .env.local

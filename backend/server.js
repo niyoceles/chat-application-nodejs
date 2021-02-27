@@ -9,6 +9,12 @@ import { signup, getAllUsers, signin } from './controllers/userController';
 const { default: checkToken } = require('./middlewares/checkToken');
 
 const server = http.createServer((req, res) => {
+	// Set CORS headers
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	res.setHeader('Access-Control-Request-Method', '*');
+	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
+	res.setHeader('Access-Control-Allow-Headers', '*');
+
 	if (req.url === '/api/users' && req.method === 'GET') {
 		// checkToken(req, res);
 		getAllUsers(req, res);
