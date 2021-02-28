@@ -1,48 +1,56 @@
-import dotenv from 'dotenv/config';
+import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/userModel';
 import { getPostData } from '../utils';
+import { FormatRequest } from '../helpers/FormatUserRequest';
+import checkToken from '../middlewares/checkToken';
+
+const headers = {
+	'Access-Control-Allow-Origin': '*',
+	'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+	'Access-Control-Max-Age': 2592000, // 30 days
+	'Content-Type': 'application/json',
+	'Access-Control-Allow-Headers': 'X-Requested-With',
+};
 
 // @desc    user signup
 // @route   POST /api/users
 export const signup = async (req, res) => {
 	try {
 		const body = await getPostData(req);
-		const { username, password } = JSON.parse(body);
-		const checkUser = await User.checkExistAccount(username);
-		if (checkUser.rows.length > 0) {
+		const values = FormatRequest(JSON.parse(body));
+		const checkUser = await User.checkExistAccount(values.username);
+		if (checkUser.rows.length) {
 			res.writeHead(203, { 'Content-Type': 'application/json' });
 			return res.end(
-				JSON.stringify({ error: 'Sorry, this username already exists' })
+				JSON.stringify({
+					message: 'Sorry, this username already exists',
+					errors: [{ path: 'username' }],
+				})
 			);
 		}
-		const values = [username, bcrypt.hashSync(password)];
-
-		const newUser = await User.create(values);
-		if (newUser.rows.length > 0) {
-			const token = jwt.sign(
-				{
-					id: newUser.rows[0].id,
-					email: newUser.rows[0].email,
-				},
-				process.env.SECRET_KEY,
-				{
-					expiresIn: 86400, // expires in 24 hours
-				}
-			);
-			delete newUser.rows[0].password;
+		const user = await User.create([
+			values.username,
+			bcrypt.hashSync(values.password),
+		]);
+		if (user.rows.length) {
+			const { password, ...rest } = user.rows[0];
+			const token = jwt.sign({ ...rest }, process.env.SECRET_KEY, {
+				expiresIn: 86400,
+			}); // expires in 24 hours
 			res.writeHead(201, { 'Content-Type': 'application/json' });
 			return res.end(
 				JSON.stringify({
 					token,
-					user: newUser.rows[0],
+					user: rest,
 					message: 'successful created an account',
 				})
 			);
 		}
 	} catch (error) {
-		console.log(error);
+		res.writeHead(error.status);
+		return res.end({ message: error.message, errors: error.errors });
 	}
 };
 
@@ -51,31 +59,20 @@ export const signup = async (req, res) => {
 export const signin = async (req, res) => {
 	try {
 		const body = await getPostData(req);
-		const { username, password } = JSON.parse(body);
-		const { rows } = await User.checkExistAccount(username);
+		const values = FormatRequest(JSON.parse(body));
+		const { rows } = await User.checkExistAccount(values.username);
 		if (rows.length > 0) {
 			for (let i = 0; i < rows.length; i += 1) {
-				if (bcrypt.compareSync(password, rows[i].password)) {
+				if (bcrypt.compareSync(values.password, rows[i].password)) {
+					const { password, ...rest } = rows[i];
 					const token = jwt.sign(
-						{
-							id: rows[i].id,
-							username: rows[i].username,
-							password: rows[i].password,
-						},
+						{ id: rest.id, username: rest.username, password: password },
 						process.env.SECRET_KEY,
-						{
-							expiresIn: 86400, // expires in 24 hours
-						}
+						{ expiresIn: 86400 } // expires in 24 hours
 					);
-
-					delete rows[0].password;
-					res.writeHead(200, { 'Content-Type': 'application/json' });
+					res.writeHead(200, headers);
 					return res.end(
-						JSON.stringify({
-							token,
-							user: rows[0],
-							message: 'successful login',
-						})
+						JSON.stringify({ token, user: rest, message: 'successful login' })
 					);
 				}
 			}
@@ -83,29 +80,34 @@ export const signin = async (req, res) => {
 
 		res.writeHead(401, { 'Content-Type': 'application/json' });
 		return res.end(
-			JSON.stringify({
-				error: 'Sorry, your username or password is incorrect',
-			})
+			JSON.stringify({ error: 'Sorry, your username or password is incorrect' })
 		);
 	} catch (error) {
-		console.log(error);
+		res.writeHead(error.status, { 'Content-Type': 'application/json' });
+		return res.end(
+			JSON.stringify({ message: error.message, errors: error.errors })
+		);
 	}
 };
 
 // GET All registered users
 export const getAllUsers = async (req, res) => {
 	const body = await getPostData(req);
-	// const { username } = JSON.parse(body);
-	const username = 'test2';
-	try {
-		const users = await User.findAll(username);
+	if (!(await checkToken(req, res))) {
+		res.writeHead(401, { 'Content-Type': 'application/json' });
+		return res.end(
+			JSON.stringify({ message: 'Please, Authentication is required!' })
+		);
+	}
 
+	try {
+		const users = await User.findAll(req.user.username);
 		if (users.rows.length > 0) {
 			for (let i = 0; i < users.rows.length; i += 1) {
 				delete users.rows[i].password;
 				users.rows[i].createdAt = new Date(
 					users.rows[i].createdAt
-				).toLocaleTimeString();
+				).toDateString();
 			}
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.end(JSON.stringify(users.rows));
@@ -114,14 +116,10 @@ export const getAllUsers = async (req, res) => {
 			res.end(JSON.stringify({ error: 'user not found!' }));
 		}
 	} catch (error) {
-		console.log(error);
+		// console.log(error);
 	}
 };
 
-const exp = {
-	signup,
-	signin,
-	getAllUsers,
-};
+const exp = { signup, signin, getAllUsers };
 
 export default exp;

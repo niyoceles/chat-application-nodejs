@@ -1,26 +1,20 @@
 import jwt from 'jsonwebtoken';
-import { getPostData } from '../utils';
 
 const checkToken = async (req, res) => {
-	const body = await getPostData(req);
-	const { token } = JSON.parse(body);
+	console.log("header token===", req.headers.authorization)
+	if (req.headers.authorization === undefined) return false;
 
-	if (!token) {
-		res.writeHead(401, { 'Content-Type': 'application/json' });
-		return res.end(
-			JSON.stringify({ error: 'Please, Authentication is required!' })
-		);
-	}
+	// @split the provided token
+	const token = req.headers.authorization.split(' ')[1];
+	if (!token) return false;
 
-	jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
-		if (err) {
-			res.writeHead(500, { 'Content-Type': 'application/json' });
-			return res.end(JSON.stringify({ error: 'Failed to authenticate token' }));
-		}
-		// next();
+	try {
+		const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+		req.user = decodedToken;
 		return true;
-	});
-	return true;
+	} catch (error) {
+		return false
+	}
 };
 
 export default checkToken;

@@ -1,14 +1,8 @@
 import http from 'http';
-
-const {
-	sendMessage,
-	getMyChats,
-} = require('./controllers/messageController');
-
+const { sendMessage, getMyChats } = require('./controllers/messageController');
 import { signup, getAllUsers, signin } from './controllers/userController';
-const { default: checkToken } = require('./middlewares/checkToken');
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
 	// Set CORS headers
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Request-Method', '*');
@@ -21,24 +15,22 @@ const server = http.createServer((req, res) => {
 	}
 
 	if (req.url === '/api/users' && req.method === 'GET') {
-		// checkToken(req, res);
-		getAllUsers(req, res);
+		await getAllUsers(req, res);
 	} else if (req.url === '/api/users' && req.method === 'POST') {
-		signup(req, res);
+		await signup(req, res);
 	} else if (req.url === '/api/users/login' && req.method === 'POST') {
-		signin(req, res);
+		await signin(req, res);
 	} else if (req.url === '/api/message' && req.method === 'POST') {
-		// checkToken(req, res);
-		sendMessage(req, res);
+		await sendMessage(req, res);
 	} else if (req.url === '/api/messages' && req.method === 'POST') {
-		getMyChats(req, res);
+		await getMyChats(req, res);
 	} else {
 		res.writeHead(404, { 'Content-Type': 'application/json' });
 		res.end(JSON.stringify({ message: 'Route Not Found' }));
 	}
 });
 
-const PORT = process.env.PORT || 9001;
+const PORT = process.env.PORT || 9000;
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

@@ -1,5 +1,12 @@
 import db from '../config';
 
+export const findOne = username => {
+	const users = db.query('SELECT * FROM users WHERE username=$1', [username]);
+	return new Promise((resolve, reject) => {
+		resolve(users);
+	});
+};
+
 export const findAll = username => {
 	const users = db.query('SELECT * FROM users WHERE username!=$1', [username]);
 	return new Promise((resolve, reject) => {
@@ -28,10 +35,6 @@ export const create = values => {
 	});
 };
 
-const exportModels = {
-	findAll,
-	checkExistAccount,
-	create,
-};
+const exportModels = { findAll, findOne, checkExistAccount, create };
 
 export default exportModels;

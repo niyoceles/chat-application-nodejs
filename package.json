@@ -4,7 +4,7 @@
   "description": "one-to-one-chat-application",
   "main": "server.js",
   "scripts": {
-    "test": "mocha --require @babel/register --timeout 10000",
+    "test": "mocha --require @babel/register --timeout 60000",
     "dev": "nodemon server.js --exec babel-node --presets @babel/preset-env",
     "start": "npm run createTables && nodemon server.js --exec babel-node --presets @babel/preset-env",
     "createTables": "babel-node ./config/database dropTables && babel-node ./config/database createTables"
@@ -34,6 +34,7 @@
     "@babel/register": "^7.13.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
+    "faker": "^5.4.0",
     "jsonwebtoken": "^8.5.1",
     "make-runnable": "^1.3.8",
     "pg": "^8.5.1",
