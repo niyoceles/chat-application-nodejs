@@ -27,10 +27,10 @@ const server = http.createServer((req, res) => {
 		signup(req, res);
 	} else if (req.url === '/api/users/login' && req.method === 'POST') {
 		signin(req, res);
-	} else if (req.url === '/api/messages' && req.method === 'POST') {
+	} else if (req.url === '/api/message' && req.method === 'POST') {
 		// checkToken(req, res);
 		sendMessage(req, res);
-	} else if (req.url === '/api/messages' && req.method === 'GET') {
+	} else if (req.url === '/api/messages' && req.method === 'POST') {
 		getMyChats(req, res);
 	} else {
 		res.writeHead(404, { 'Content-Type': 'application/json' });

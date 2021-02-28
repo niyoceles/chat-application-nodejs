@@ -105,7 +105,7 @@ export const getAllUsers = async (req, res) => {
 				delete users.rows[i].password;
 				users.rows[i].createdAt = new Date(
 					users.rows[i].createdAt
-				).toDateString();
+				).toLocaleTimeString();
 			}
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.end(JSON.stringify(users.rows));

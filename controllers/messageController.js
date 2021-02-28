@@ -12,6 +12,9 @@ export const sendMessage = async (req, res) => {
 
 		const newMessage = await Message.createMessage(values);
 		if (newMessage.rows.length > 0) {
+			newMessage.rows[0].createdAt = new Date(
+				newMessage.rows[0].createdAt
+			).toLocaleTimeString();
 			res.writeHead(201, { 'Content-Type': 'application/json' });
 			return res.end(JSON.stringify(newMessage.rows[0]));
 		}
@@ -29,9 +32,11 @@ export const getMyChats = async (req, res) => {
 		const messages = await Message.findMyChat(sender, receiver);
 
 		if (messages.rows.length > 0) {
-			messages.rows[0].createdAt = new Date(
-				messages.rows[0].createdAt
-			).toDateString();
+			for (let i = 0; i < messages.rows.length; i += 1) {
+				messages.rows[i].createdAt = new Date(
+					messages.rows[i].createdAt
+				).toLocaleTimeString();
+			}
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.end(JSON.stringify(messages.rows));
 		} else {
