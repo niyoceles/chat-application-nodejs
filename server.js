@@ -15,6 +15,11 @@ const server = http.createServer((req, res) => {
 	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
 	res.setHeader('Access-Control-Allow-Headers', '*');
 
+	if (req.method === 'OPTIONS') {
+		res.writeHead(204);
+		return res.end();
+	}
+
 	if (req.url === '/api/users' && req.method === 'GET') {
 		// checkToken(req, res);
 		getAllUsers(req, res);
