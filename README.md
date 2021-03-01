@@ -1,8 +1,8 @@
 
 
-[![Build Status](https://travis-ci.com/niyoceles/chat-application-backend.svg?token=xUbyyC9LGLqK7qnqHbyR&branch=develop)](https://travis-ci.com/niyoceles/chat-application-backend)
-[![Maintainability](https://api.codeclimate.com/v1/badges/71efd3b45688c677147b/maintainability)](https://codeclimate.com/github/niyoceles/chat-application-backend/maintainability)
-[![Coverage Status](https://coveralls.io/repos/github/niyoceles/chat-application-backend/badge.svg)](https://coveralls.io/github/niyoceles/chat-application-backend)
+[![Build Status](https://travis-ci.org/niyoceles/chat-application-backend.svg?branch=main)](https://travis-ci.org/niyoceles/chat-application-backend)
+
+[![Coverage Status](https://coveralls.io/repos/github/niyoceles/chat-application-backend/badge.svg?branch=main)](https://coveralls.io/github/niyoceles/chat-application-backend?branch=main)
 
 # chat-application
 Build, test and deploy a one to one chat application using React/Redux, Node.js, and PostgreSQL
