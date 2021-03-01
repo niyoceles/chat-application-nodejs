@@ -1,7 +1,6 @@
 
 
 [![Build Status](https://travis-ci.org/niyoceles/chat-application-backend.svg?branch=main)](https://travis-ci.org/niyoceles/chat-application-backend)
-
 [![Coverage Status](https://coveralls.io/repos/github/niyoceles/chat-application-backend/badge.svg?branch=main)](https://coveralls.io/github/niyoceles/chat-application-backend?branch=main)
 
 # chat-application
@@ -37,7 +36,9 @@ cd chat-application-backend
 ```
 ### Config your database & .env
 DATABASE_URL=
+
 DATABASE_URL_TEST=
+
 SECRET_KEY=
 
 Next install the package dependencies by running
