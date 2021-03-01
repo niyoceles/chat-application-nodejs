@@ -1,4 +1,7 @@
 import {
+  formatError
+} from '../helpers/FormatError';
+import {
   FormatRequest
 } from '../helpers/FormatUserRequest';
 import checkToken from '../middlewares/checkToken';
@@ -47,29 +50,30 @@ export const sendMessage = async (req, res) => {
       return res.end(JSON.stringify(message.rows[0]));
     }
   } catch (error) {
-    res.writeHead(error.status);
-    return res.end({
-      message: error.message,
-      errors: error.errors,
+    const apiError = formatError(error);
+    res.writeHead(apiError.code, {
+      'Content-Type': 'application/json',
     });
+    return res.end(JSON.stringify(apiError.body));
   }
 };
 
 // GET All my messages
 export const getMyChats = async (req, res) => {
-  const body = await getPostData(req);
-  if (!(await checkToken(req, res))) {
-    res.writeHead(401, {
-      'Content-Type': 'application/json',
-    });
-    return res.end(
-      JSON.stringify({
-        message: 'Please, Authentication is required!',
-      })
-    );
-  }
-  const values = FormatRequest(JSON.parse(body), ['sender']);
   try {
+    const body = await getPostData(req);
+    if (!(await checkToken(req, res))) {
+      res.writeHead(401, {
+        'Content-Type': 'application/json',
+      });
+      return res.end(
+        JSON.stringify({
+          message: 'Please, Authentication is required!',
+        })
+      );
+    }
+    const values = FormatRequest(JSON.parse(body), ['sender']);
+
     const messages = await Message.findMyChat(values.sender, req.user.username);
     if (messages.rows.length) {
       res.writeHead(200, {
@@ -87,18 +91,17 @@ export const getMyChats = async (req, res) => {
       );
     }
   } catch (error) {
-    console.log(error);
-    res.writeHead(error.status);
-    return res.end({
-      message: error.message,
-      errors: error.errors,
+    const apiError = formatError(error);
+    res.writeHead(apiError.code, {
+      'Content-Type': 'application/json',
     });
+    return res.end(JSON.stringify(apiError.body));
   }
 };
 
-const exp = {
+const exportMessage = {
   sendMessage,
   getMyChats,
 };
 
-export default exp;
+export default exportMessage;
