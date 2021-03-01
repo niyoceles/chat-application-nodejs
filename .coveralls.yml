@@ -1,0 +1,3 @@
+service_name: travis-pro
+service_pull_request: true
+repo_token: IusELP2mRNMfn8aBC6Gn305DXg2qXGlXf

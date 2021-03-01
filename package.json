@@ -4,9 +4,11 @@
   "description": "one-to-one-chat-application",
   "main": "server.js",
   "scripts": {
-    "test": "mocha --require @babel/register --timeout 60000",
-    "dev": "nodemon server.js --exec babel-node --presets @babel/preset-env",
     "start": "npm run createTables && nodemon server.js --exec babel-node --presets @babel/preset-env",
+    "dev": "nodemon server.js --exec babel-node --presets @babel/preset-env",
+    "test": "NODE_ENV=test npm run createTables:test && NODE_ENV=test mocha --require @babel/register --timeout 60000 --exit",
+    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls && nyc --reporter=lcov --reporter=text-lcov npm test",
+    "createTables:test": "babel-node ./config/database dropTables && babel-node ./config/database createTables",
     "createTables": "babel-node ./config/database dropTables && babel-node ./config/database createTables"
   },
   "repository": {
@@ -24,8 +26,13 @@
     "@babel/preset-env": "^7.13.5",
     "chai": "^4.3.0",
     "chai-http": "^4.3.0",
+    "coveralls": "^3.1.0",
+    "eslint": "^7.21.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
     "mocha": "^8.3.0",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "nyc": "^15.1.0"
   },
   "dependencies": {
     "@babel/cli": "^7.13.0",
