@@ -9,6 +9,9 @@ import {
   FormatRequest
 } from '../helpers/FormatUserRequest';
 import checkToken from '../middlewares/checkToken';
+import {
+  formatError
+} from '../helpers/FormatError';
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -69,11 +72,11 @@ export const signup = async (req, res) => {
       );
     }
   } catch (error) {
-    res.writeHead(error.status);
-    return res.end({
-      message: error.message,
-      errors: error.errors,
+    const apiError = formatError(error);
+    res.writeHead(apiError.code, {
+      'Content-Type': 'application/json',
     });
+    return res.end(JSON.stringify(apiError.body));
   }
 };
 
@@ -101,7 +104,7 @@ export const signin = async (req, res) => {
             process.env.SECRET_KEY,
             {
               expiresIn: 86400,
-            } // expires in 24 hours
+            } // expires in 24 hour
           );
           res.writeHead(200, headers);
           return res.end(
@@ -124,21 +127,16 @@ export const signin = async (req, res) => {
       })
     );
   } catch (error) {
-    res.writeHead(error.status, {
+    const apiError = formatError(error);
+    res.writeHead(apiError.code, {
       'Content-Type': 'application/json',
     });
-    return res.end(
-      JSON.stringify({
-        message: error.message,
-        errors: error.errors,
-      })
-    );
+    return res.end(JSON.stringify(apiError.body));
   }
 };
 
 // GET All registered users
 export const getAllUsers = async (req, res) => {
-  const body = await getPostData(req);
   if (!(await checkToken(req, res))) {
     res.writeHead(401, {
       'Content-Type': 'application/json',
@@ -174,14 +172,17 @@ export const getAllUsers = async (req, res) => {
       );
     }
   } catch (error) {
-    // console.log(error);
+    const apiError = formatError(error);
+    res.writeHead(apiError.code, {
+      'Content-Type': 'application/json',
+    });
+    return res.end(JSON.stringify(apiError.body));
   }
 };
 
-const exp = {
+const exportUser = {
   signup,
   signin,
   getAllUsers,
 };
-
-export default exp;
+export default exportUser;
