@@ -3,19 +3,25 @@
 [![Build Status](https://travis-ci.org/niyoceles/chat-application-backend.svg?branch=main)](https://travis-ci.org/niyoceles/chat-application-backend)
 [![Coverage Status](https://coveralls.io/repos/github/niyoceles/chat-application-backend/badge.svg?branch=main)](https://coveralls.io/github/niyoceles/chat-application-backend?branch=main)
 
+# chat-application.
 
 ## Description
 Build, test and deploy a one to one chat application using React/Redux, Node.js, and PostgreSQL
 
+## Link to the final product click [here](https://www.chatapp.niyonsaba.com/)
+#### Login & create an account account (for new user)
+![image](https://user-images.githubusercontent.com/30776949/109550916-8fdbbf80-7ad8-11eb-9bc1-ac688511834a.png)
 
----
+#### registered users (one can chat with each other)
+![image](https://user-images.githubusercontent.com/30776949/109550414-ec8aaa80-7ad7-11eb-99c3-77b401970c4c.png)
 
-## Link to the app final product
-### Click [here](https://www.chatapp.niyonsaba.com/) to go to the app. 
+#### Chatting one on one
+![image](https://user-images.githubusercontent.com/30776949/109550247-afbeb380-7ad7-11eb-8b48-db337ee1c9f9.png)
 
 ## Github Repositories
 ### This repository is for Backend
-### Click [here](https://github.com/niyoceles/chat-application-frontend) to go to the Frontend repository.
+### Frontend repository Click [here](https://github.com/niyoceles/chat-application-frontend).
+
 # Tools and Technologies:
 ## FRONTEND:
 ReactJs, HTML and CSS (for building user interface)
