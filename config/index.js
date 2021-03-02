@@ -4,7 +4,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connString = process.env.DATABASE_URL;
+const connString = (process.env.NODE_ENV).toUpperCase() !== "TEST" ?
+  process.env.DATABASE_URL : process.env.DATABASE_URL_TEST;
 const pool = new pg.Pool({
   connectionString: connString,
 });

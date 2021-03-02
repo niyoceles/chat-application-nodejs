@@ -2,16 +2,10 @@ import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/userModel';
-import {
-  getPostData
-} from '../utils';
-import {
-  FormatRequest
-} from '../helpers/FormatUserRequest';
+import { getPostData } from '../utils';
+import { FormatRequest } from '../helpers/FormatUserRequest';
 import checkToken from '../middlewares/checkToken';
-import {
-  formatError
-} from '../helpers/FormatError';
+import { formatError } from '../helpers/FormatError';
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -23,60 +17,19 @@ const headers = {
 
 // @desc    user signup
 // @route   POST /api/users
-export const signup = async (req, res) => {
+export const signup = async (request, response) => {
   try {
-    const body = await getPostData(req);
+    const body = await getPostData(request);
     const values = FormatRequest(JSON.parse(body));
-    const checkUser = await User.checkExistAccount(values.username);
-    if (checkUser.rows.length) {
-      res.writeHead(203, {
-        'Content-Type': 'application/json',
-      });
-      return res.end(
-        JSON.stringify({
-          message: 'Sorry, this username already exists',
-          errors: [
-            {
-              path: 'username',
-            },
-          ],
-        })
-      );
-    }
-    const user = await User.create([
-      values.username,
-      bcrypt.hashSync(values.password),
-    ]);
-    if (user.rows.length) {
-      const {
-        password, ...rest
-      } = user.rows[0];
-      const token = jwt.sign(
-        {
-          ...rest,
-        },
-        process.env.SECRET_KEY,
-        {
-          expiresIn: 86400,
-        }
-      ); // expires in 24 hours
-      res.writeHead(201, {
-        'Content-Type': 'application/json',
-      });
-      return res.end(
-        JSON.stringify({
-          token,
-          user: rest,
-          message: 'successful created an account',
-        })
-      );
-    }
+    const user = await User.create([values.username, bcrypt.hashSync(values.password),]);
+    const { password, ...rest } = user.rows[0];
+    const token = jwt.sign({ ...rest, }, process.env.SECRET_KEY, { expiresIn: 86400, }); // expires in 24 hours
+    response.writeHead(201, { 'Content-Type': 'application/json', });
+    return response.end(JSON.stringify({ token, user: rest, message: 'successful created an account', }));
   } catch (error) {
     const apiError = formatError(error);
-    res.writeHead(apiError.code, {
-      'Content-Type': 'application/json',
-    });
-    return res.end(JSON.stringify(apiError.body));
+    response.writeHead(apiError.code, { 'Content-Type': 'application/json', });
+    return response.end(JSON.stringify(apiError.body));
   }
 };
 
@@ -85,104 +38,42 @@ export const signup = async (req, res) => {
 export const signin = async (req, res) => {
   try {
     const body = await getPostData(req);
-    const values = FormatRequest(JSON.parse(body));
-    const {
-      rows
-    } = await User.checkExistAccount(values.username);
-    if (rows.length > 0) {
-      for (let i = 0; i < rows.length; i += 1) {
-        if (bcrypt.compareSync(values.password, rows[i].password)) {
-          const {
-            password, ...rest
-          } = rows[i];
-          const token = jwt.sign(
-            {
-              id: rest.id,
-              username: rest.username,
-              password,
-            },
-            process.env.SECRET_KEY,
-            {
-              expiresIn: 86400,
-            } // expires in 24 hour
-          );
-          res.writeHead(200, headers);
-          return res.end(
-            JSON.stringify({
-              token,
-              user: rest,
-              message: 'successful login',
-            })
-          );
-        }
-      }
-    }
-
-    res.writeHead(401, {
-      'Content-Type': 'application/json',
-    });
-    return res.end(
-      JSON.stringify({
-        error: 'Sorry, your username or password is incorrect',
-      })
+    const values = FormatRequest(JSON.parse(body), ["username", "password"], [], true);
+    const { rows } = await User.findOne(values.username);
+    if (!rows.length) throw new Error("user not found");
+    if (!bcrypt.compareSync(values.password, rows[0].password)) throw new Error("password not match");
+    const { password, ...rest } = rows[0];
+    const token = jwt.sign(
+      { id: rest.id, username: rest.username, password, },
+      process.env.SECRET_KEY, { expiresIn: 86400, } // expires in 24 hour
     );
+    res.writeHead(200, headers);
+    return res.end(JSON.stringify({ token, user: rest, message: 'successful login', }));
   } catch (error) {
     const apiError = formatError(error);
-    res.writeHead(apiError.code, {
-      'Content-Type': 'application/json',
-    });
+    res.writeHead(apiError.code, { 'Content-Type': 'application/json', });
     return res.end(JSON.stringify(apiError.body));
   }
 };
 
 // GET All registered users
 export const getAllUsers = async (req, res) => {
-  if (!(await checkToken(req, res))) {
-    res.writeHead(401, {
-      'Content-Type': 'application/json',
-    });
-    return res.end(
-      JSON.stringify({
-        message: 'Please, Authentication is required!',
-      })
-    );
-  }
-
   try {
-    const users = await User.findAll(req.user.username);
-    if (users.rows.length > 0) {
-      for (let i = 0; i < users.rows.length; i += 1) {
-        delete users.rows[i].password;
-        users.rows[i].createdAt = new Date(
-          users.rows[i].createdAt
-        ).toDateString();
-      }
-      res.writeHead(200, {
-        'Content-Type': 'application/json',
-      });
-      res.end(JSON.stringify(users.rows));
-    } else {
-      res.writeHead(404, {
-        'Content-Type': 'application/json',
-      });
-      res.end(
-        JSON.stringify({
-          error: 'user not found!',
-        })
-      );
-    }
+    if (!(await checkToken(req, res))) throw new Error("not authenticated");
+    const { rows } = await User.findAll(req.user.username);
+    if (!rows.length) throw new Error('user not found')
+    const result = await Promise.all(rows.map((user) => {
+      const { password, ...restInfo } = user;
+      return { ...restInfo, createdAt: new Date(restInfo.createdAt).toDateString() }
+    }));
+    res.writeHead(200, { 'Content-Type': 'application/json', });
+    res.end(JSON.stringify(result));
   } catch (error) {
     const apiError = formatError(error);
-    res.writeHead(apiError.code, {
-      'Content-Type': 'application/json',
-    });
+    res.writeHead(apiError.code, { 'Content-Type': 'application/json', });
     return res.end(JSON.stringify(apiError.body));
   }
 };
 
-const exportUser = {
-  signup,
-  signin,
-  getAllUsers,
-};
+const exportUser = { signup, signin, getAllUsers, };
 export default exportUser;
