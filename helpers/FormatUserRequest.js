@@ -1,48 +1,30 @@
-export const FormatRequest = (
-  data,
-  required = ['username', 'password'],
-  optional = []
-) => {
+export const FormatRequest = (data, required = ['username', 'password'], optional = [], isLogin = false) => {
   const values = new Object(data);
   const fieldErrors = [];
 
   required.forEach((field) => {
     if (!Object.keys(data).includes(field)) {
-      const error = {
-        path: '', message: ''
-      };
+      const error = { path: '', message: '' };
       error.path = field;
       error.message = ` ${field} field is required`;
       fieldErrors.push(error);
     } else {
       if (typeof data[field] === 'string' && !data[field]) {
-        const error = {
-          path: '', message: ''
-        };
+        const error = { path: '', message: '' };
         error.path = field;
         error.message = `${field} field is not allowed to be empty`;
         fieldErrors.push(error);
       }
-      if (
-        field == 'username'
-				&& !new RegExp(/^[a-zA-Z]+/i).test(data.username)
-      ) {
-        const error = {
-          path: '', message: ''
-        };
+      if (field == 'username' && !new RegExp(/^[a-z]+$/g).test(data.username) && !isLogin) {
+        const error = { path: '', message: '' };
         error.path = field;
-        error.message = `${field} should start with a letter`;
+        error.message = `${field} should be only small letter`;
         fieldErrors.push(error);
       }
-      if (
-        field == 'reciever'
-				&& !new RegExp(/^[a-zA-Z]+/i).test(data.reciever)
-      ) {
-        const error = {
-          path: '', message: ''
-        };
+      if (field == 'reciever' && !new RegExp(/^[a-z]+/g).test(data.reciever)) {
+        const error = { path: '', message: '' };
         error.path = field;
-        error.message = `${field} should start with a letter`;
+        error.message = `${field} should be only small letter`;
         fieldErrors.push(error);
       }
     }

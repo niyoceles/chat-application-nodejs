@@ -1,14 +1,12 @@
 import db from '../config';
 
-export const findMyChat = (sender, receiver) => {
+export const findMyChat = (sender, receiver) => new Promise((resolve, reject) => {
   const getMyChat = db.query(
     'SELECT * FROM messages WHERE sender=$1 AND receiver=$2 OR sender=$2 AND receiver=$1',
     [sender, receiver]
   );
-  return new Promise((resolve, reject) => {
-    resolve(getMyChat);
-  });
-};
+  resolve(getMyChat);
+});
 
 export const createMessage = (values) => new Promise((resolve, reject) => {
   const inserData = `INSERT INTO
@@ -20,9 +18,6 @@ export const createMessage = (values) => new Promise((resolve, reject) => {
   resolve(newMessage);
 });
 
-const MessageModel = {
-  findMyChat,
-  createMessage,
-};
+const MessageModel = { findMyChat, createMessage };
 
 export default MessageModel;

@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connString = process.env.DATABASE_URL;
+const connString = (process.env.NODE_ENV).toUpperCase() !== "TEST" ?
+	process.env.DATABASE_URL : process.env.DATABASE_URL_TEST;
 const pool = new pg.Pool({
 	connectionString: connString,
 });
@@ -38,7 +39,7 @@ const createTables = () => {
 	const usersTable = `CREATE TABLE IF NOT EXISTS
       users(
         id SERIAL PRIMARY KEY,
-        username VARCHAR(100) NULL,
+        username VARCHAR(100) UNIQUE NOT NULL,
         password TEXT NOT NULL,
         "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )`;
@@ -46,8 +47,8 @@ const createTables = () => {
 	const messagesTable = `CREATE TABLE IF NOT EXISTS
       messages(
         id SERIAL PRIMARY KEY,
-        sender VARCHAR(100) NULL,
-        receiver VARCHAR(100) NULL,
+        sender VARCHAR(100) NOT NULL,
+        receiver VARCHAR(100) NOT NULL,
         message TEXT NULL,
         "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )`;

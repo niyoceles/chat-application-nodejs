@@ -9,7 +9,7 @@ const { expect } = chai;
 chai.use(chaiThings);
 chai.use(chaiLike);
 
-describe('- FormatRequest(data:object, required=[], optional=[]):object', () => {
+describe('#FormatRequest(data:object, required=[], optional=[]):object', () => {
     it("should throw an error for any invalid request format", async () => {
         const data = {};
         const required = ["username"]
@@ -22,7 +22,7 @@ describe('- FormatRequest(data:object, required=[], optional=[]):object', () => 
     });
 
     it("should throw an error for any field is which is not supposed to be a part of the request", async () => {
-        const data = { username: faker.name.firstName(), phoneNumber: faker.phone.phoneNumber('(+2##)#########') };
+        const data = { username:faker.internet.password(8, false, /^[a-z]/g), phoneNumber: faker.phone.phoneNumber('(+2##)#########') };
         const required = ["username"]
         try {
             FormatRequest(data, required);
@@ -66,12 +66,14 @@ describe('- FormatRequest(data:object, required=[], optional=[]):object', () => 
     });
 
     it("should return the valid object", async () => {
-        const data = { username: faker.name.firstName(), password: faker.internet.password(10, false, /^[a-zA-Z0-9]+/i) };
-        const required = ["username", "password"]
+        const data = {
+            username: faker.internet.password(8, false, /^[a-z]/g),
+            password: faker.internet.password(10, false, /^[a-zA-Z0-9]+/i)
+        };
+        const required = ["username", "password"];
         expect(FormatRequest(data, required)).to.be.an("object");
-        expect(FormatRequest(data, required)).property("username").to.be.a("string")
-        expect(FormatRequest(data, required)).property("password").to.be.a("string")
-
+        expect(FormatRequest(data, required)).property("username").to.be.a("string");
+        expect(FormatRequest(data, required)).property("password").to.be.a("string");
     });
 
 
