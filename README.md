@@ -46,7 +46,7 @@ The following should be installed in your machine:
 Start by cloning the repository to your local machine
 
 ```bash
-git clone https://github.com/niyoceles/chat-application-backend.git
+git clone https://github.com/niyoceles/chat-application-nodejs.git
 
 cd chat-application-backend
 ```
